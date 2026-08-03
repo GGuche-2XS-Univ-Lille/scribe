@@ -4,22 +4,15 @@
 #include "sink.h"
 
 extern scribe_code_t scribe_stdout_sink_prepare_method(scribe_sink_t *sink, void *data);
-extern scribe_code_t scribe_stdout_sink_start_method(scribe_sink_t *sink);
 extern scribe_code_t scribe_stdout_sink_write_method(scribe_sink_t *sink,
                                                      const void *data, size_t bytesize);
-extern scribe_code_t scribe_stdout_sink_end_method(scribe_sink_t *sink);
 extern scribe_code_t scribe_stdout_sink_commit_method(scribe_sink_t *sink);
 
 typedef scribe_sink_class_t scribe_stdout_sink_class_t;
-
 extern const scribe_stdout_sink_class_t scribe_stdout_sink_class;
 
-#define SCRIBE_STDOUT_SINK_CLASS_INITIALIZER(prepare_method,                         \
-                                             start_method, write_method, end_method, \
-                                             commit_method)                          \
-SCRIBE_SINK_CLASS_INITIALIZER(prepare_method,                                        \
-                              start_method, write_method, end_method,                \
-                              commit_method)
+#define SCRIBE_STDOUT_SINK_CLASS_INITIALIZER(prepare_method, write_method, commit_method) \
+SCRIBE_SINK_CLASS_INITIALIZER(prepare_method, write_method, commit_method)
 
 typedef struct scribe_stdout_sink_s {
     const scribe_stdout_sink_class_t *klass;
@@ -30,22 +23,16 @@ typedef struct scribe_stdout_sink_s {
     .klass = &scribe_stdout_sink_class   \
 }
 
+#define SCRIBE_STDOUT_SINK_DEFAULT_INITIALIZER()  SCRIBE_STDOUT_SINK_INITIALIZER()
+
 static inline scribe_code_t scribe_stdout_sink_prepare(scribe_stdout_sink_t *stdout_sink,
                                                        void *data) {
     return scribe_sink_prepare((scribe_sink_t *)stdout_sink, data);
 }
 
-static inline scribe_code_t scribe_stdout_sink_start(scribe_stdout_sink_t *stdout_sink) {
-    return scribe_sink_start((scribe_sink_t *)stdout_sink);
-}
-
 static inline scribe_code_t scribe_stdout_sink_write(scribe_stdout_sink_t *stdout_sink,
                                                      const void *data, size_t bytesize) {
     return scribe_sink_write((scribe_sink_t *)stdout_sink, data, bytesize);
-}
-
-static inline scribe_code_t scribe_stdout_sink_end(scribe_stdout_sink_t *stdout_sink) {
-    return scribe_sink_end((scribe_sink_t *)stdout_sink);
 }
 
 static inline scribe_code_t scribe_stdout_sink_commit(scribe_stdout_sink_t *stdout_sink) {

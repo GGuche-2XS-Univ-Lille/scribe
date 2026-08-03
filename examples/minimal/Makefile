@@ -44,6 +44,11 @@ ifdef DEBUG
 override CFLAGS           += -Og
 override CFLAGS           += -ggdb
 endif
+ifdef WITH_COAP_ENABLED
+ifeq ($(filter "-DSCRIBE_COAP_SINK_ENABLED", $(CFLAGS)),)
+override CFLAGS           += -DSCRIBE_COAP_SINK_ENABLED
+endif
+endif
 
 all: $(ALL_TARGETS)
 

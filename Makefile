@@ -34,6 +34,11 @@ CFLAGS         += $(RIOT_CFLAGS)
 else # RIOT_CFLAGS
 CFLAGS         += -Iboards/$(BOARD)
 endif # RIOT_CFLAGS
+ifdef WITH_COAP_ENABLED
+ifeq ($(filter "-DSCRIBE_COAP_SINK_ENABLED", $(CFLAGS)),)
+CFLAGS         += -DSCRIBE_COAP_SINK_ENABLED
+endif
+endif
 
 TARGET          = scribe
 SOURCES         = $(wildcard src/*.c)
@@ -41,7 +46,8 @@ OBJECTS         = $(SOURCES:.c=.o)
 
 OBJS = $(addprefix $(BOARD)/,$(OBJECTS))
 
-all: $(BOARD)/$(TARGET).a examples
+
+all: $(BOARD)/$(TARGET).a build-examples
 
 $(BOARD)/src:
 	mkdir -p $(BOARD)/src
@@ -59,9 +65,9 @@ $(BOARD)/$(TARGET).a: $(OBJS)
 $(BOARD)/src/%.o: $(BOARD)/src/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-examples:
+build-examples: $(BOARD)/$(TARGET).a
 	$(MAKE) -C examples BOARD="$(BOARD)" DEBUG="$(DEBUG)" PREFIX="$(PREFIX)" CC="$(CC)" \
-                           CFLAGS="$(CFLAGS)"
+                            CFLAGS="$(CFLAGS)" WITH_COAP_ENABLED="$(WITH_COAP_ENABLED)"
 
 clean-examples:
 	$(MAKE) -C examples clean

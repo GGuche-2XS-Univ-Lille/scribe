@@ -3,7 +3,7 @@ all: minimal
 
 minimal:
 	$(MAKE) -C minimal BOARD="$(BOARD)" DEBUG="$(DEBUG)" PREFIX="$(PREFIX)" CC="$(CC)" \
-                           CFLAGS="$(CFLAGS)"
+                           CFLAGS="$(CFLAGS)" WITH_COAP_ENABLED="$(WITH_COAP_ENABLED)"
 
 clean-minimal:
 	$(MAKE) -C minimal clean

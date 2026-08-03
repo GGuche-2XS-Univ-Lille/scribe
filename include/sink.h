@@ -10,39 +10,25 @@
 typedef struct scribe_sink_s scribe_sink_t;
 
 typedef scribe_code_t (*scribe_sink_prepare_method_t)(scribe_sink_t *sink, void *data);
-
-typedef scribe_code_t (*scribe_sink_start_method_t)(scribe_sink_t *sink);
 typedef scribe_code_t (*scribe_sink_write_method_t)(scribe_sink_t *sink,
                                                     const void *data, size_t bytesize);
-typedef scribe_code_t (*scribe_sink_end_method_t)(scribe_sink_t *sink);
-
 typedef scribe_code_t (*scribe_sink_commit_method_t)(scribe_sink_t *sink);
 
 typedef struct scribe_sink_class_s {
     scribe_sink_prepare_method_t prepare;
-
-    scribe_sink_start_method_t   start;
     scribe_sink_write_method_t   write;
-    scribe_sink_end_method_t     end;
-
     scribe_sink_commit_method_t  commit;
 } scribe_sink_class_t;
 
-#define SCRIBE_SINK_CLASS_INITIALIZER(prepare_method,                         \
-                                      start_method, write_method, end_method, \
-                                      commit_method)                          \
-{                                                                             \
-    .prepare = prepare_method,                                                \
-                                                                              \
-    .start   = start_method,                                                  \
-    .write   = write_method,                                                  \
-    .end     = end_method,                                                    \
-                                                                              \
-    .commit  = commit_method,                                                 \
+#define SCRIBE_SINK_CLASS_INITIALIZER(prepare_method, write_method, commit_method) \
+{                                                                                  \
+    .prepare = prepare_method,                                                     \
+    .write   = write_method,                                                       \
+    .commit  = commit_method,                                                      \
 }
 
 /* Not relying on offsetof(scribe_sink_class_t, write) to automatically scale
- * when adding methods */
+ * when adding/removing methods */
 static const size_t scribe_sink_class_last_method_offset =
     sizeof(scribe_sink_class_t) - sizeof(uintptr_t);
 
@@ -111,14 +97,6 @@ static inline scribe_code_t scribe_sink_prepare(scribe_sink_t *sink, void *data)
     return sink->klass->prepare(sink, data);
 }
 
-static inline scribe_code_t scribe_sink_start(scribe_sink_t *sink) {
-    const scribe_code_t code = SCRIBE_SINK_CHECK_METHOD(sink, start);
-    if (code != SCRIBE_CODE_OK) {
-        return code;
-    }
-    return sink->klass->start(sink);
-}
-
 static inline scribe_code_t scribe_sink_write(scribe_sink_t *sink,
                                               const void *data, size_t bytesize) {
     const scribe_code_t code = SCRIBE_SINK_CHECK_METHOD(sink, write);
@@ -126,14 +104,6 @@ static inline scribe_code_t scribe_sink_write(scribe_sink_t *sink,
         return code;
     }
     return sink->klass->write(sink, data, bytesize);
-}
-
-static inline scribe_code_t scribe_sink_end(scribe_sink_t *sink) {
-    const scribe_code_t code = SCRIBE_SINK_CHECK_METHOD(sink, write);
-    if (code != SCRIBE_CODE_OK) {
-        return code;
-    }
-    return sink->klass->end(sink);
 }
 
 static inline scribe_code_t scribe_sink_commit(scribe_sink_t *sink) {

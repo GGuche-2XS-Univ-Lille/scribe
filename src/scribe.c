@@ -53,41 +53,19 @@ scribe_code_t scribe_prepare(void **data) {
     return SCRIBE_CODE_OK;
 }
 
-scribe_code_t scribe_start(void) {
-    scribe_code_t code = scribe_check();
-    if (code != SCRIBE_CODE_OK) {
-        return code;
-    }
-    for (size_t i = 0; i < scribe_sinks_count; i++) {
-        code = scribe_sink_start(scribe_sinks[i]);
-        if (code != SCRIBE_CODE_OK) {
-            return code;
-        }
-    }
-    return SCRIBE_CODE_OK;
-}
-
 scribe_code_t scribe_write(const void *data, size_t bytesize) {
     scribe_code_t code = scribe_check();
     if (code != SCRIBE_CODE_OK) {
         return code;
     }
+    if (data == NULL) {
+        return SCRIBE_CODE_NO_DATA;
+    }
+    if (bytesize == 0) {
+        return SCRIBE_CODE_INVALID_DATA_BYTESIZE;
+    }
     for (size_t i = 0; i < scribe_sinks_count; i++) {
         code = scribe_sink_write(scribe_sinks[i], data, bytesize);
-        if (code != SCRIBE_CODE_OK) {
-            return code;
-        }
-    }
-    return SCRIBE_CODE_OK;
-}
-
-scribe_code_t scribe_end(void) {
-    scribe_code_t code = scribe_check();
-    if (code != SCRIBE_CODE_OK) {
-        return code;
-    }
-    for (size_t i = 0; i < scribe_sinks_count; i++) {
-        code = scribe_sink_end(scribe_sinks[i]);
         if (code != SCRIBE_CODE_OK) {
             return code;
         }
