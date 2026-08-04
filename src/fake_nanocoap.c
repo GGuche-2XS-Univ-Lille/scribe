@@ -12,46 +12,78 @@ do {                                                                            
     fprintf(file_ptr, "FAKE_NANOCOAP:%s:%d:" format, __func__, __LINE__, ##__VA_ARGS__); \
 } while (0)
 
-#define FAKE_NANOCOAP_LOG_FUNCTION_INFO_EX(file_ptr, format, ...) \
-FAKE_NANOCOAP_LOG_FUNCTION(file_ptr, "[INFO]:" format, ##__VA_ARGS__)
+#ifdef NDEBUG
+#   define FAKE_NANOCOAP_LOG_FUNCTION_DEBUG_EX(file_ptr, format, ...) do {} while (0)
+#else /*NDEBUG */
+#   define FAKE_NANOCOAP_LOG_FUNCTION_DEBUG_EX(file_ptr, format, ...) \
+    FAKE_NANOCOAP_LOG_FUNCTION(file_ptr, "[DEBUG]:" format, ##__VA_ARGS__)
+#endif /* NDEBUG */
 
 #define FAKE_NANOCOAP_LOG_FUNCTION_ERROR_EX(file_ptr, format, ...) \
 FAKE_NANOCOAP_LOG_FUNCTION(file_ptr, "[ERROR]:" format, ##__VA_ARGS__)
 
-#define FAKE_NANOCOAP_LOG_FUNCTION_INFO(format, ...) \
-FAKE_NANOCOAP_LOG_FUNCTION_INFO_EX(stdout, format, ##__VA_ARGS__)
+#define FAKE_NANOCOAP_LOG_FUNCTION_DEBUG(format, ...) \
+FAKE_NANOCOAP_LOG_FUNCTION_DEBUG_EX(stdout, format, ##__VA_ARGS__)
 
 #define FAKE_NANOCOAP_LOG_FUNCTION_ERROR(format, ...) \
 FAKE_NANOCOAP_LOG_FUNCTION_ERROR_EX(stderr, format, ##__VA_ARGS__)
 
 void coap_block2_init(coap_pkt_t *pkt, coap_block_slicer_t *slicer) {
-    FAKE_NANOCOAP_LOG_FUNCTION_INFO("(pkt=%p, slicer=%p\n", pkt, slicer);
+#ifdef NDEBUG
+    (void)pkt;
+    (void)slicer;
+#endif
+
+    FAKE_NANOCOAP_LOG_FUNCTION_DEBUG("(pkt=%p, slicer=%p\n", pkt, slicer);
 }
 
 int gcoap_resp_init(coap_pkt_t *pdu, uint8_t *buf, size_t len, unsigned code) {
-    FAKE_NANOCOAP_LOG_FUNCTION_INFO("(pdu=%p, buf=%p, len=%zu, code=%x\n", pdu, buf, len, code);
+#ifdef NDEBUG
+    (void)pdu;
+    (void)buf;
+    (void)len;
+    (void)code;
+#endif
+    FAKE_NANOCOAP_LOG_FUNCTION_DEBUG("(pdu=%p, buf=%p, len=%zu, code=%x\n", pdu, buf, len, code);
     return 0;
 }
 
 ssize_t coap_opt_add_format(coap_pkt_t *pkt, uint16_t format) {
-    FAKE_NANOCOAP_LOG_FUNCTION_INFO("(pkt=%p, format=0x%" PRIu16 ")\n", pkt, format);
+#ifdef NDEBUG
+    (void)pkt;
+    (void)format;
+#endif
+    FAKE_NANOCOAP_LOG_FUNCTION_DEBUG("(pkt=%p, format=0x%" PRIu16 ")\n", pkt, format);
     return 0;
 }
 
 ssize_t coap_opt_add_block2(coap_pkt_t *pkt, coap_block_slicer_t *slicer, bool more) {
-    FAKE_NANOCOAP_LOG_FUNCTION_INFO("(pkt=%p, slicer=%p, more=%s)\n",
+#ifdef NDEBUG
+    (void)pkt;
+    (void)slicer;
+    (void)more;
+#endif
+    FAKE_NANOCOAP_LOG_FUNCTION_DEBUG("(pkt=%p, slicer=%p, more=%s)\n",
                                     pkt, slicer, (more) ? "true" : "false");
     return 0;
 }
 
 ssize_t coap_opt_finish(coap_pkt_t *pkt, uint16_t flags) {
-    FAKE_NANOCOAP_LOG_FUNCTION_INFO("(pkt=%p, 0x%" PRIx16 ")\n", pkt, flags);
+#ifdef NDEBUG
+    (void)pkt;
+    (void)flags;
+#endif
+    FAKE_NANOCOAP_LOG_FUNCTION_DEBUG("(pkt=%p, 0x%" PRIx16 ")\n", pkt, flags);
     return 0;
 }
 
 int coap_blockwise_put_bytes_pkt(coap_pkt_t *pdu, coap_block_slicer_t *slicer,
                                  const void *c, size_t len) {
-    FAKE_NANOCOAP_LOG_FUNCTION_INFO("(pdu=%p, slicer=%p, data=%p, len:%zu)\n",
+#ifdef NDEBUG
+    (void)pdu;
+    (void)slicer;
+#endif
+    FAKE_NANOCOAP_LOG_FUNCTION_DEBUG("(pdu=%p, slicer=%p, data=%p, len:%zu)\n",
                                     pdu, slicer, c, len);
     if (len > (size_t)INT_MAX) {
         FAKE_NANOCOAP_LOG_FUNCTION_ERROR("Not enough space in buffer (max=%d)\n", INT_MAX);
@@ -62,7 +94,10 @@ int coap_blockwise_put_bytes_pkt(coap_pkt_t *pdu, coap_block_slicer_t *slicer,
 }
 
 bool coap_block2_finish(coap_block_slicer_t *slicer) {
-    FAKE_NANOCOAP_LOG_FUNCTION_INFO("(slicer=%p\n", slicer);
+#ifdef NDEBUG
+    (void)slicer;
+#endif
+    FAKE_NANOCOAP_LOG_FUNCTION_DEBUG("(slicer=%p\n", slicer);
     return true;
 }
 

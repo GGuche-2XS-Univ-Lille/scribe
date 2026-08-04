@@ -1,6 +1,17 @@
+include board.mk
+include quiet.mk
+
 ifndef RIOT_CFLAGS
+
 ifeq ("$(wildcard toolchain.mk)","")
-    $(error "Run ./configure.sh first")
+    ifeq ($(BOARD),)
+        $(error "Run ./configure.sh first")
+    else
+        $(shell ./configure.sh --board=$(BOARD))
+        ifeq ("$(wildcard toolchain.mk)","")
+            $(error "Failed to configure toolchain with BOARD='$(BOARD)'")
+        endif
+    endif
 endif
 
 include toolchain.mk
@@ -22,7 +33,7 @@ CFLAGS         += -mthumb
 endif
 CFLAGS         += $(BOARD_CFLAGS)
 ifndef DEBUG
-CFLAGS         += -Os
+CFLAGS         += -Os -DNDEBUG
 else
 CFLAGS         += -Og
 CFLAGS         += -ggdb
@@ -47,41 +58,50 @@ OBJECTS         = $(SOURCES:.c=.o)
 OBJS = $(addprefix $(BOARD)/,$(OBJECTS))
 
 
-all: $(BOARD)/$(TARGET).a build-examples
+all: $(BOARD)/$(TARGET).a build-examples run-examples
 
 $(BOARD)/src:
-	mkdir -p $(BOARD)/src
+	$(QUIET_CHAR)mkdir -p $(BOARD)/src
 
 $(BOARD)/src/%.c: src/%.c $(BOARD)/src
-	cp $< $@
+	$(QUIET_CHAR)cp $< $@
 
 ifdef DEBUG
 .PRECIOUS: $(BOARD)/src/%.c
 endif
 
 $(BOARD)/$(TARGET).a: $(OBJS)
-	$(AR) rcs $@ $^
+	$(QUIET_CHAR)$(AR) rcs $@ $^
 
 $(BOARD)/src/%.o: $(BOARD)/src/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(QUIET_CHAR)$(CC) $(CFLAGS) -c $< -o $@
 
 build-examples: $(BOARD)/$(TARGET).a
-	$(MAKE) -C examples BOARD="$(BOARD)" DEBUG="$(DEBUG)" PREFIX="$(PREFIX)" CC="$(CC)" \
-                            CFLAGS="$(CFLAGS)" WITH_COAP_ENABLED="$(WITH_COAP_ENABLED)"
+	$(QUIET_CHAR)$(MAKE) -C examples build QUIET="$(QUIET)" \
+                                               BOARD="$(BOARD)" DEBUG="$(DEBUG)" \
+                                               PREFIX="$(PREFIX)" CC="$(CC)" CFLAGS="$(CFLAGS)" \
+                                               WITH_COAP_ENABLED="$(WITH_COAP_ENABLED)"
+
+run-examples: build-examples
+	$(QUIET_CHAR)$(MAKE) -C examples run QUIET="$(QUIET)" \
+                                             BOARD="$(BOARD)" DEBUG="$(DEBUG)" \
+                                             PREFIX="$(PREFIX)" CC="$(CC)" CFLAGS="$(CFLAGS)" \
+                                             WITH_COAP_ENABLED="$(WITH_COAP_ENABLED)"
 
 clean-examples:
-	$(MAKE) -C examples clean
+	$(QUIET_CHAR)$(MAKE) -C examples clean
 
 realclean-examples:
-	$(MAKE) -C examples realclean
+	$(QUIET_CHAR)$(MAKE) -C examples realclean
 
 clean-objects:
-	$(RM) $(BOARD)/$(OBJECTS)
+	$(QUIET_CHAR)$(RM) $(BOARD)/$(OBJECTS)
 
 clean: clean-objects clean-examples
 
 realclean: realclean-examples
-	$(RM) -rf workstation
-	$(RM) -f toolchain.mk
+	$(QUIET_CHAR)$(RM) -rf workstation
+	$(QUIET_CHAR)$(RM) -f toolchain.mk
 
-.PHONY: all clean clean-objects realclean clean-examples realclean-examples
+.PHONY: all clean-objects clean realclean \
+        clean-examples realclean-examples run-examples
