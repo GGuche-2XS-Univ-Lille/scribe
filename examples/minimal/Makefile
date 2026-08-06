@@ -1,92 +1,89 @@
 ROOT             := $(abspath ../..)
 
-include $(ROOT)/quiet.mk
-include $(ROOT)/board.mk
+include $(ROOT)/makefiles/root.mk
+include $(ROOT)/makefiles/quiet.mk
+include $(ROOT)/makefiles/board.mk
+include $(ROOT)/makefiles/coap.mk
+include $(ROOT)/makefiles/debug.mk
+include $(ROOT)/makefiles/compiler.mk
+include $(ROOT)/makefiles/help.mk
 
-TARGET           ?= bin/minimal
+include $(ROOT)/variables.mk
+
+ifeq ($(ROOT),)
+    $(error ROOT has not been defined)
+endif
+
+BUILD_DIR        := build
+BIN_DIR          := bin
+TARGET           := $(BIN_DIR)/minimal
 SOURCES          := $(wildcard *.c)
-OBJECTS          := $(SOURCES:%.c=build/%.o)
+OBJECTS          := $(SOURCES:%.c=$(BUILD_DIR)/%.o)
+DEPS             := $(SOURCES:%.c=$(BUILD_DIR)/%.d)
 SCRIBE_LIB_SHORT := $(BOARD)/scribe.a
 SCRIBE_LIB       := $(ROOT)/$(SCRIBE_LIB_SHORT)
 CONFIGURE        := $(ROOT)/configure.sh
 ALL_TARGETS      := $(TARGET)
 
-
-ifeq ($(BOARD), workstation)
-ALL_TARGETS      += run
+ifeq ($(strip $(BOARD)), workstation)
+    ALL_TARGETS  += run
 endif
 
-ifeq ($(ROOT),)
-$(error ROOT has not been defined)
-endif
-
-ifeq ($(CC),)
-$(warning CC has not been defined, fallback to 'cc')
-override CC := cc
-endif
-
-
-ifeq ($(MAKECMDGOALS),)
-override MAKECMDGOALS := $(ALL_TARGETS)
+ifeq ($(strip $(MAKECMDGOALS)),)
+    override MAKECMDGOALS := $(ALL_TARGETS)
 endif
 
 CFLAGS_TARGETS := $(TARGET) $(SCRIBE_LIB)
 ifneq ($(filter $(CFLAGS_TARGETS), $(MAKECMDGOALS)),)
-ifeq ($(CFLAGS),)
-$(warning CFLAGS has not been defined)
-endif
+    ifeq ($(strip $(CFLAGS)),)
+        $(warning CFLAGS has not been defined)
+    endif
 endif
 
-override CFLAGS           += -Wall
-override CFLAGS           += -Wextra
-override CFLAGS           += -Werror
-override CFLAGS           += --std=c11
-override CFLAGS           += -I$(ROOT)
-override CFLAGS           += -I$(ROOT)/boards/$(BOARD)
-override CFLAGS           += -I$(ROOT)/include
-ifdef DEBUG
-override CFLAGS           += -Og -ggdb
-else
-override CFLAGS           += -Os -DNDEBUG
-endif
-ifdef WITH_COAP_ENABLED
-ifeq ($(filter "-DSCRIBE_COAP_SINK_ENABLED", $(CFLAGS)),)
-override CFLAGS           += -DSCRIBE_COAP_SINK_ENABLED
-endif
-endif
+include $(ROOT)/cflags.mk
 
 PHONY_RULES := all clean realclean
 ifeq ($(BOARD), workstation)
-PHONY_RULES += run
+    PHONY_RULES += run
 endif
 
 all: $(ALL_TARGETS)
 
+$(BUILD_DIR):
+	$(QUIET_CHAR)mkdir -p $@
+
+$(BIN_DIR):
+	$(QUIET_CHAR)mkdir -p $@
+
+include $(ROOT)/makefiles/build_params_tracker.mk
+
 $(SCRIBE_LIB):
 ifdef VERBOSE
 	$(info For $(SCRIBE_LIB):)
+	$(info - QUIET is '$(QUIET)')
 	$(info - PREFIX is '$(PREFIX)')
 	$(info - CC is '$(CC)')
+	$(info - LOG is '$(LOG)')
+	$(info - LOG_SEVERITY_LEVEL is '$(LOG_SEVERITY_LEVEL)')
 	$(info - BOARD is '$(BOARD)')
 	$(info - CFLAGS is '$(CFLAGS)')
-	$(info - WITH_COAP_ENABLED is '$(WITH_COAP_ENABLED)')
+	$(info - COAP is '$(COAP)')
 endif
-	$(QUIET_CHAR)$(CONFIGURE) --board=$(BOARD)
-	$(QUIET_CHAR)$(MAKE) -C $(ROOT) $(SCRIBE_LIB_SHORT) \
-                                        BOARD="$(BOARD)" DEBUG="$(DEBUG)" \
-                                        CC=$(CC) PREFIX="$(PREFIX)" CFLAGS="$(CFLAGS)" \
-                                        WITH_COAP_ENABLED="$(WITH_COAP_ENABLED)"
+	$(QUIET_CHAR)$(MAKE) -C $(ROOT) \
+                             $(SCRIBE_LIB_SHORT) \
+                             QUIET="$(QUIET)" BOARD="$(BOARD)" \
+                             PREFIX="$(PREFIX)" CC="$(CC)" \
+                             DEBUG="$(DEBUG)" COAP="$(COAP)" \
+                             LOG="$(LOG)" LOG_SEVERITY_LEVEL="$(LOG_SEVERITY_LEVEL)" \
+                             CFLAGS="$(CFLAGS)"
 
-build:
-	$(QUIET_CHAR)mkdir -p $@
+$(BUILD_DIR)/%.o: %.c $(BUILD_PARAMS_TRACKER) | $(BUILD_DIR)
+	$(QUIET_CHAR)$(CC) $(CFLAGS) -MD -MP -MF $(patsubst %.o,%.d, $@) -c $< -o $@
 
-bin:
-	$(QUIET_CHAR)mkdir -p $@
+-include $(DEPS)
 
-build/%.o: %.c | build
-	$(QUIET_CHAR)$(CC) $(CFLAGS) -c $< -o $@
 
-$(TARGET): $(OBJECTS) $(SCRIBE_LIB) | bin
+$(TARGET): $(OBJECTS) $(SCRIBE_LIB) | $(BIN_DIR)
 	$(QUIET_CHAR)$(CC) $(OBJECTS) $(SCRIBE_LIB) -o $@
 
 ifeq ($(BOARD), workstation)
@@ -95,9 +92,18 @@ run: $(TARGET)
 endif
 
 clean:
-	$(QUIET_CHAR)$(RM) -r build
+	$(QUIET_CHAR)$(RM) -r $(BUILD_DIR)
 
 realclean: clean
-	$(QUIET_CHAR)$(RM) -r bin
+	$(QUIET_CHAR)$(RM) -r $(BIN_DIR)
+
+help:
+	$(call help_rule_line,help,Displays this text)
+	$(call help_rule_line,$(TARGET),Builds executable into \"$(BUILD_DIR)\" directory)
+	$(call help_rule_line,run,Executes \"$(TARGET)\" (when BOARD is equal to \"$(BOARD_WORKSTATION)\"))
+	$(call help_rule_line,all,Performs \"$(ALL_TARGETS)\" targets)
+	$(call help_rule_line,clean,Deletes \"$(BUILD_DIR)\" directory)
+	$(call help_rule_line,realclean,Deletes \"$(BIN_DIR)\" directory and performs also \"clean\" target)
+	$(call help_variables)
 
 .PHONY: $(PHONY_RULES)

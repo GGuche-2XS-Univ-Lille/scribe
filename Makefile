@@ -1,5 +1,14 @@
-include board.mk
-include quiet.mk
+ROOT := $(abspath .)
+
+include $(ROOT)/makefiles/root.mk
+include $(ROOT)/makefiles/quiet.mk
+include $(ROOT)/makefiles/board.mk
+include $(ROOT)/makefiles/debug.mk
+include $(ROOT)/makefiles/coap.mk
+include $(ROOT)/makefiles/compiler.mk
+include $(ROOT)/makefiles/help.mk
+
+include $(ROOT)/variables.mk
 
 ifndef RIOT_CFLAGS
 
@@ -18,84 +27,77 @@ include toolchain.mk
 include boards/$(BOARD)/toolchain.mk
 endif # RIOT_CFLAGS
 
-CC              = $(PREFIX)gcc
-AR              = $(PREFIX)ar
+include $(ROOT)/cflags.mk
 
-CFLAGS          = -Wall
-CFLAGS         += -Wextra
-CFLAGS         += -Werror
-ifeq ($(BOARD), workstation)
-CFLAGS         += -std=c11
-CFLAGS         += -Wno-unused-function
-else
-CFLAGS         += -ffreestanding
-CFLAGS         += -mthumb
-endif
-CFLAGS         += $(BOARD_CFLAGS)
-ifndef DEBUG
-CFLAGS         += -Os -DNDEBUG
-else
-CFLAGS         += -Og
-CFLAGS         += -ggdb
-endif
-CFLAGS         += -I./include
-ifdef RIOT_CFLAGS
-CFLAGS         += $(RIOT_INCLUDES)
-CFLAGS         += $(RIOT_CFLAGS)
-else # RIOT_CFLAGS
-CFLAGS         += -Iboards/$(BOARD)
-endif # RIOT_CFLAGS
-ifdef WITH_COAP_ENABLED
-ifeq ($(filter "-DSCRIBE_COAP_SINK_ENABLED", $(CFLAGS)),)
-CFLAGS         += -DSCRIBE_COAP_SINK_ENABLED
-endif
+AR      := $(PREFIX)ar
+TARGET  := scribe
+SOURCES := $(wildcard src/*.c)
+OBJECTS := $(SOURCES:.c=.o)
+OBJS    := $(addprefix $(BOARD)/,$(OBJECTS))
+DEPS    := $(OBJS:%.o=%.d)
+
+RELATIVE_HEADERS_AND_SOURCES := $(SOURCES) $(HEADERS)
+HEADERS_AND_SOURCES := $(foreach f,$(RELATIVE_HEADERS_AND_SOURCES),$(abspath $(f)))
+
+ALL_TARGETS := $(BOARD)/$(TARGET).a build-examples
+ifeq ($(strip $(BOARD)), workstation)
+ALL_TARGETS += run-examples
 endif
 
-TARGET          = scribe
-SOURCES         = $(wildcard src/*.c)
-OBJECTS         = $(SOURCES:.c=.o)
-
-OBJS = $(addprefix $(BOARD)/,$(OBJECTS))
-
-
-all: $(BOARD)/$(TARGET).a build-examples run-examples
+all: $(ALL_TARGETS)
 
 $(BOARD)/src:
 	$(QUIET_CHAR)mkdir -p $(BOARD)/src
 
-$(BOARD)/src/%.c: src/%.c $(BOARD)/src
-	$(QUIET_CHAR)cp $< $@
+$(BOARD)/src/%.c: src/%.c | $(BOARD)/src
+	$(QUIET_CHAR)cmp -s $< $@ || cp $< $@
 
-ifdef DEBUG
 .PRECIOUS: $(BOARD)/src/%.c
+
+ifdef BUILD_DIR_PATH
+    $(error BUILD_DIR_PATH has already been defined as '$(BUILD_DIR_PATH)')
 endif
+BUILD_DIR_PATH := $(BOARD)/src
+include makefiles/build_params_tracker.mk
 
 $(BOARD)/$(TARGET).a: $(OBJS)
 	$(QUIET_CHAR)$(AR) rcs $@ $^
 
-$(BOARD)/src/%.o: $(BOARD)/src/%.c
-	$(QUIET_CHAR)$(CC) $(CFLAGS) -c $< -o $@
+build-library: $(BOARD)/$(TARGET).a
+
+$(BOARD)/src/%.o: $(BOARD)/src/%.c $(BUILD_PARAMS_TRACKER)
+	$(QUIET_CHAR)$(CC) $(CFLAGS) -MD -MP -MF $(patsubst %.o,%.d, $@) -c $< -o $@
+
+-include $(DEPS)
 
 build-examples: $(BOARD)/$(TARGET).a
-	$(QUIET_CHAR)$(MAKE) -C examples build QUIET="$(QUIET)" \
+	$(QUIET_CHAR)$(MAKE) -C examples build QUIET="$(QUIET)" VERBOSE="$(VERBOSE)" \
                                                BOARD="$(BOARD)" DEBUG="$(DEBUG)" \
                                                PREFIX="$(PREFIX)" CC="$(CC)" CFLAGS="$(CFLAGS)" \
-                                               WITH_COAP_ENABLED="$(WITH_COAP_ENABLED)"
-
+                                               LOG="$(LOG)" \
+                                               LOG_SEVERITY_LEVEL="$(LOG_SEVERITY_LEVEL)" \
+                                               COAP="$(COAP)"
+ifeq ($(strip $(BOARD)), workstation)
 run-examples: build-examples
-	$(QUIET_CHAR)$(MAKE) -C examples run QUIET="$(QUIET)" \
+	$(QUIET_CHAR)$(MAKE) -C examples run QUIET="$(QUIET)" VERBOSE="$(VERBOSE)" \
                                              BOARD="$(BOARD)" DEBUG="$(DEBUG)" \
                                              PREFIX="$(PREFIX)" CC="$(CC)" CFLAGS="$(CFLAGS)" \
-                                             WITH_COAP_ENABLED="$(WITH_COAP_ENABLED)"
+                                             LOG="$(LOG)" \
+                                             LOG_SEVERITY_LEVEL="$(LOG_SEVERITY_LEVEL)" \
+                                             COAP="$(COAP)"
+endif # ($(strip $(BOARD)), workstation)
 
 clean-examples:
-	$(QUIET_CHAR)$(MAKE) -C examples clean
+	$(QUIET_CHAR)$(MAKE) -C examples clean QUIET="$(QUIET)" VERBOSE="$(VERBOSE)"
 
 realclean-examples:
-	$(QUIET_CHAR)$(MAKE) -C examples realclean
+	$(QUIET_CHAR)$(MAKE) -C examples realclean QUIET="$(QUIET)" VERBOSE="$(VERBOSE)"
 
 clean-objects:
-	$(QUIET_CHAR)$(RM) $(BOARD)/$(OBJECTS)
+	$(QUIET_CHAR)$(RM) -f $(OBJS)
+
+clean-library:
+	$(QUIET_CHAR)$(RM) -f $(BOARD)/$(TARGET).a
 
 clean: clean-objects clean-examples
 
@@ -103,5 +105,17 @@ realclean: realclean-examples
 	$(QUIET_CHAR)$(RM) -rf workstation
 	$(QUIET_CHAR)$(RM) -f toolchain.mk
 
-.PHONY: all clean-objects clean realclean \
+help:
+	$(call help_rule_line,help,Displays this text)
+	$(call help_rule_line,build-library,Builds $(TARGET) static library according to the selected BOARD)
+	$(call help_rule_line,build-examples,Builds all examples)
+	$(call help_rule_line,run-examples,Runs all examples (when BOARD is equal to \"$(BOARD_WORKSTATION)\"))
+	$(call help_rule_line,clean-examples,Cleans all examples)
+	$(call help_rule_line,realclean-examples,Cleans all artifacts in all examples)
+	$(call help_rule_line,all,Performs \"$(ALL_TARGETS)\" targets)
+	$(call help_rule_line,clean,Cleans objects and all examples)
+	$(call help_rule_line,realclean,Cleans all artifacts)
+	$(call help_variables)
+
+.PHONY: all build-library clean-objects clean-library clean realclean \
         clean-examples realclean-examples run-examples
