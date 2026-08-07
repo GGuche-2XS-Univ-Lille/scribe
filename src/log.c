@@ -23,10 +23,20 @@ static const char *scribe_log_severity_level_labels[SCRIBE_LOG_SEVERITY_LEVELS_C
 static scribe_log_severity_level_t scribe_log_severity_level = SCRIBE_LOG_SEVERITY_LEVEL_DEFAULT;
 
 static inline bool scribe_log_check_severity_level(scribe_log_severity_level_t severity_level) {
+    /* For some reasons, "arm-none-eabi-gcc 15.2.Rel1 (Build arm-15.86)) 15.2.1 20251203"
+     * seems to consider that the enumeration cannot be < O.
+     * To the best of my knowledge C enumeration underlying type are usually signed integers,
+     * but it appears to not be the case here (stdc version ?)
+     */
+#if !defined(__arm__) && !defined(__thumb__)
     assert(severity_level >= SCRIBE_LOG_SEVERITY_LEVEL_FIRST);
+#endif
     assert(severity_level <= SCRIBE_LOG_SEVERITY_LEVEL_LAST);
-    const bool result =     (severity_level >= SCRIBE_LOG_SEVERITY_LEVEL_FIRST)
-                        &&  (severity_level <= SCRIBE_LOG_SEVERITY_LEVEL_LAST);
+    const bool result =
+#if !defined(__arm__) && !defined(__thumb__)
+        (severity_level >= SCRIBE_LOG_SEVERITY_LEVEL_FIRST) &&
+#endif
+        (severity_level <= SCRIBE_LOG_SEVERITY_LEVEL_LAST);
     return result;
 }
 

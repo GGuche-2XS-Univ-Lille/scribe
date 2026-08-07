@@ -21,13 +21,13 @@ typedef enum scribe_log_severity_level_e {
     SCRIBE_LOG_SEVERITY_LEVEL_DEBUG       = 7,
     SCRIBE_LOG_SEVERITY_LEVEL_LAST        = SCRIBE_LOG_SEVERITY_LEVEL_DEBUG,
 #else
-
     SCRIBE_LOG_SEVERITY_LEVEL_LAST        = SCRIBE_LOG_SEVERITY_LEVEL_INFORMATION,
 #endif
 
 #ifndef SCRIBE_LOG_SEVERITY_LEVEL_DEFAULT
     SCRIBE_LOG_SEVERITY_LEVEL_DEFAULT     = SCRIBE_LOG_SEVERITY_LEVEL_WARNING,
 #endif
+
 } scribe_log_severity_level_t;
 
 #define SCRIBE_LOG_SEVERITY_LEVELS_COUNT \
@@ -69,8 +69,9 @@ do {                                                                            
 #define scribe_log_set_severity_level(severity_level) do {} while(0)
 #define scribe_log_get_severity_level() (-1)
 #define scribe_log_get_severity_level_label(severity_level) SCRIBE_LOG_SEVERITY_LEVEL_UNKNOWN_LABEL
-#define scribe_log(scribe_log_severity_level_t severity_level, const char *format, ...) \
-do {} while(0)
+#define scribe_log(severity_level, format, ...) do {} while(0)
+
+#define SCRIBE_LOG(severity_level, format, ...) do {} while (0)
 
 #endif /* SCRIBE_LOG_ENABLED */
 

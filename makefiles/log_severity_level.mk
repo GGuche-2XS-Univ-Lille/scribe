@@ -131,7 +131,7 @@ LOG_SEVERITY_LEVEL_6 := 6
 LOG_SEVERITY_LEVELS_POSSIBLE_VALUES += \"$(LOG_SEVERITY_LEVEL_INFORMATION)\" \"$(LOG_SEVERITY_LEVEL_INFO)\" \"$(LOG_SEVERITY_LEVEL_6)\"
 
 
-ifneq ($(DEBUG), $(DEBUG_DISABLED))
+ifneq ($(DEBUG),$(DEBUG_DISABLED))
 
 ifdef LOG_SEVERITY_LEVEL_DEBUG
     $(error LOG_SEVERITY_LEVEL_DEBUG has already been defined outside of log_severity_level.mk)
@@ -167,11 +167,11 @@ ifeq ($(QUIET_CHAR),)
     $(info LOG_SEVERITY_LEVEL is "$(LOG_SEVERITY_LEVEL)")
 endif
 
-ifeq ($(LOG), $(LOG_DISABLED))
+ifeq ($(LOG),$(LOG_DISABLED))
     $(error LOG_SEVERITY_LEVEL ("$(LOG_SEVERITY_LEVEL)") has been defined, but LOG has been disabled ("$(LOG)"))
 endif
 
-ifneq ($(LOG_SEVERITY_LEVEL), $(LOG_SEVERITY_LEVEL_NONE))
+ifneq ($(LOG_SEVERITY_LEVEL),$(LOG_SEVERITY_LEVEL_NONE))
     ifndef CFLAGS
         CFLAGS := "-DSCRIBE_LOG_SEVERITY_LEVEL_DEFAULT=$(LOG_SEVERITY_LEVEL)"
     else

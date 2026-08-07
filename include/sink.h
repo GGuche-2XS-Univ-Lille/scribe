@@ -49,7 +49,7 @@ static inline scribe_code_t scribe_sink_class_check_base(const scribe_sink_class
     const uint8_t *class_start = (const uint8_t *)sink_class;
     for (size_t offset_it = first_method_offset; offset_it <= last_method_offset;
          offset_it+=sizeof(void *)) {
-        const void **method = (const void **)&class_start[offset_it];
+        const void **method = (const void **)(uintptr_t)&class_start[offset_it];
         if (*method == NULL) {
             return SCRIBE_CODE_NULL_SINK_CLASS_METHOD;
         }

@@ -58,7 +58,8 @@ ifeq ($(DEBUG), $(DEBUG_DISABLED))
     ifndef CFLAGS
         CFLAGS := $(RELEASE_CFLAGS)
     else
-       override CFLAGS += $(RELEASE_CFLAGS)
+       INCOMING_CFLAGS := $(CFLAGS)
+       override CFLAGS += $(filter-out $(INCOMING_CFLAGS),$(RELEASE_CFLAGS))
     endif
 
 else #($(DEBUG), $(DEBUG_DISABLED))
@@ -77,8 +78,46 @@ else #($(DEBUG), $(DEBUG_DISABLED))
     ifndef CFLAGS
         CFLAGS := $(DEBUG_CFLAGS)
     else
-       override CFLAGS += $(DEBUG_CFLAGS)
+       INCOMING_CFLAGS := $(CFLAGS)
+       override CFLAGS += $(filter-out $(INCOMING_CFLAGS),$(DEBUG_CFLAGS))
     endif
+
+
+    ifndef LOG
+
+       ifeq ($(strip $(QUIET_CHAR)),)
+           $(warning LOG automatically enabled due to DEBUG)
+           LOG := $(LOG_ENABLED)
+       endif
+
+    else # LOG
+
+       ifeq ($(strip $(LOG)),0)
+           $(error LOG has been disabled but DEBUG needs to enable it)
+       endif
+
+    endif # LOG
+
+
+    ifndef LOG_SEVERITY_LEVEL
+
+       ifeq ($(strip $(QUIET_CHAR)),)
+           LOG_SEVERITY_LEVEL := SCRIBE_LOG_SEVERITY_LEVEL_DEBUG
+           $(warning LOG_SEVERITY_LEVEL automatically set to "$(LOG_SEVERITY_LEVEL)" due to DEBUG)
+       endif
+
+    else # LOG_SEVERITY_LEVEL
+
+       ifdef DEBUG_REQUIRED_LOG_SEVERITY_LEVELS
+           $(error DEBUG_REQUIRED_LOG_SEVERITY_LEVELS has already been defined outside of debug.mk)
+       endif
+       DEBUG_REQUIRED_LOG_SEVERITY_LEVELS := SCRIBE_LOG_SEVERITY_LEVEL_DEBUG 7
+
+       ifeq ($(filter $(DEBUG_REQUIRED_LOG_SEVERITY_LEVELS),$(LOG_SEVERITY_LEVEL)),)
+           $(error LOG_SEVERITY_LEVEL ("$(LOG_SEVERITY_LEVEL)") has been set but DEBUG requires "$(DEBUG_REQUIRED_LOG_SEVERITY_LEVELS)" )
+       endif
+
+    endif # LOG_SEVERITY_LEVEL
 
 endif # #($(DEBUG), $(DEBUG_DISABLED))
 

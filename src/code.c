@@ -1,5 +1,7 @@
 #include "code.h"
 
+#include <assert.h>
+
 static const char *scribe_code_labels[SCRIBE_CODE_COUNT] = {
     [                              SCRIBE_CODE_OK] = "OK",
     [                 SCRIBE_CODE_NOT_INITIALIZED] = "Not initialized",
@@ -17,7 +19,20 @@ static const char *scribe_code_labels[SCRIBE_CODE_COUNT] = {
 };
 
 const char * scribe_get_code_label(scribe_code_t code) {
-    if ((code < SCRIBE_CODE_FIRST) || (code > SCRIBE_CODE_LAST)) {
+    /* For some reasons, "arm-none-eabi-gcc 15.2.Rel1 (Build arm-15.86)) 15.2.1 20251203"
+     * seems to consider that the enumeration cannot be < O.
+     * To the best of my knowledge C enumeration underlying type are usually signed integers,
+     * but it appears to not be the case here (stdc version ?)
+     */
+#if !defined(__arm__) && !defined(__thumb__)
+    assert(code >= SCRIBE_CODE_FIRST);
+#endif
+    assert(code <= SCRIBE_CODE_LAST);
+    if (
+#if !defined(__arm__) && !defined(__thumb__)
+        (code < SCRIBE_CODE_FIRST) ||
+#endif
+        (code > SCRIBE_CODE_LAST)) {
         return "Unknown scribe code";
     }
 
