@@ -13,9 +13,6 @@ static scribe_stdout_sink_t stdout_sink = SCRIBE_STDOUT_SINK_INITIALIZER();
 
 #ifdef SCRIBE_COAP_SINK_ENABLED
 
-static scribe_coap_sink_instance_members_t coap_sink_prepare_data =
-    SCRIBE_COAP_SINK_INSTANCE_MEMBERS_DEFAULT_INITIALIZER();
-
 static scribe_coap_sink_t coap_sink = SCRIBE_COAP_SINK_DEFAULT_INITIALIZER();
 #define COAP_SINK_INDEX ((size_t)1)
 
@@ -34,40 +31,6 @@ static scribe_sink_t *sinks[SINKS_COUNT] = {
 #endif
 };
 
-#ifdef OLD
-static int write_message(const char *message) {
-    scribe_code_t code = scribe_start();
-    if (code != SCRIBE_CODE_OK) {
-        printf("Error: failed to start message '%s'\n"
-               "  - %s ( code : %d)\n",
-               message,
-               scribe_get_code_label(code), code);
-        return EXIT_FAILURE;
-    }
-
-    const size_t message_length = strlen(message);
-    code = scribe_write(message, message_length);
-    if (code != SCRIBE_CODE_OK) {
-        printf("Error: failed to write message '%s'\n"
-               "  - %s ( code : %d)\n",
-               message,
-               scribe_get_code_label(code), code);
-        return EXIT_FAILURE;
-    }
-
-    code = scribe_end();
-    if (code != SCRIBE_CODE_OK) {
-        printf("Error: failed to write message '%s'\n"
-               "  - %s ( code : %d)\n",
-               message,
-               scribe_get_code_label(code), code);
-        return EXIT_FAILURE;
-    }
-
-    return EXIT_SUCCESS;
-}
-#endif // #ifdef OLD
-
 static int write_message(const char *message) {
     const size_t message_length = strlen(message);
     scribe_code_t code = scribe_write(message, message_length);
@@ -75,7 +38,7 @@ static int write_message(const char *message) {
         printf("Error: failed to write message '%s'\n"
                "  - %s ( code : %d)\n",
                message,
-               scribe_get_code_label(code), code);
+               scribe_code_get_label(code), code);
         return EXIT_FAILURE;
     }
 
@@ -106,25 +69,25 @@ int main(int argc, const char *argv[]) {
     if (code != SCRIBE_CODE_OK) {
         printf("Error: failed to initialize Scribe\n"
                "  - %s ( code : %d)\n",
-               scribe_get_code_label(code), code);
+               scribe_code_get_label(code), code);
         return result;
     }
 
 #ifdef SCRIBE_COAP_SINK_ENABLED
-    coap_sink_prepare_data.pdu = (coap_pkt_t *)0xCAFEBABE;
+    coap_pkt_t *pdu = (coap_pkt_t *)0xCAFEBABE;
 #endif
 
     void *sinks_prepare_data[SINKS_COUNT] = {
         [STDOUT_SINK_INDEX] = NULL,
 #ifdef SCRIBE_COAP_SINK_ENABLED
-        [  COAP_SINK_INDEX] = &coap_sink_prepare_data,
+        [  COAP_SINK_INDEX] = pdu,
 #endif
     };
     code = scribe_prepare(sinks_prepare_data);
     if (code != SCRIBE_CODE_OK) {
         printf("Error: failed to prepare Scribe contents\n"
                "  - %s ( code : %d)\n",
-               scribe_get_code_label(code), code);
+               scribe_code_get_label(code), code);
         goto end;
     }
 
@@ -139,16 +102,13 @@ commit:
     if (code != SCRIBE_CODE_OK) {
         printf("Error: failed to commit Scribe contents\n"
                "  - %s (code : %d)\n",
-               scribe_get_code_label(code), code);
+               scribe_code_get_label(code), code);
         if (result == EXIT_SUCCESS) {
             result = EXIT_FAILURE;
         }
     }
 
 end :
-#ifdef SCRIBE_COAP_SINK_ENABLED
-    coap_sink_prepare_data.pdu = NULL;
-#endif
     scribe_release();
 
     return EXIT_SUCCESS;

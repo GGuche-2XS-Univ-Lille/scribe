@@ -28,6 +28,12 @@ LOG_DEFAULT_VALUE := $(LOG_DISABLED)
 
 ifndef LOG
     $LOG := $(LOG_NONE)
+    ifdef DEBUG
+        LOG := $(LOG_ENABLED)
+        ifeq ($(QUIET_CHAR),)
+            $(warning LOG automatically defined due to DEBUG")
+        endif
+    endif
 endif
 
 ifeq ($(strip $(LOG)),)
@@ -49,7 +55,7 @@ ifeq ($(QUIET_CHAR),)
     $(info LOG is "$(LOG)")
 endif
 
-ifneq ($(LOG), $(LOG_DISABLED))
+ifneq ($(LOG),$(LOG_DISABLED))
     ifndef CFLAGS
         CFLAGS := -DSCRIBE_LOG_ENABLED
     else

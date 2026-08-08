@@ -68,7 +68,7 @@ static inline scribe_code_t scribe_coap_sink_prepare(scribe_coap_sink_t *coap_si
 }
 
 static inline scribe_code_t scribe_coap_sink_write(scribe_coap_sink_t *coap_sink,
-                                                     const void *data, size_t bytesize) {
+                                                   const void *data, size_t bytesize) {
     return scribe_sink_write((scribe_sink_t *)coap_sink, data, bytesize);
 }
 

@@ -16,9 +16,13 @@ typedef enum scribe_code_e {
     SCRIBE_CODE_NULL_SINK_CLASS,
     SCRIBE_CODE_INTERNAL_INVALID_METHODS_OFFSETS,
     SCRIBE_CODE_NULL_SINK_CLASS_METHOD,
+
     SCRIBE_CODE_INVALID_SINK_STATE,
+    SCRIBE_CODE_PREPARATION_FAILURE,
+
     SCRIBE_CODE_NO_DATA,
     SCRIBE_CODE_INVALID_DATA_BYTESIZE,
+    SCRIBE_CODE_COMMIT_FAILURE,
 
     SCRIBE_CODE_WRITE_FAILURE,
 
@@ -28,6 +32,6 @@ typedef enum scribe_code_e {
 
 #define SCRIBE_CODE_COUNT ((size_t)( SCRIBE_CODE_LAST - SCRIBE_CODE_FIRST + 1 ))
 
-extern const char * scribe_get_code_label(scribe_code_t code);
+extern const char * scribe_code_get_label(scribe_code_t code);
 
 #endif /* SCRIBE_CODES_H */
