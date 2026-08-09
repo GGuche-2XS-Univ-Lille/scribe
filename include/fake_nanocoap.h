@@ -7,7 +7,7 @@
 #ifndef SCRIBE_COAP_FAKE_NANOCOAP_H
 #define SCRIBE_COAP_FAKE_NANOCOAP_H
 
-#ifdef SCRIBE_COAP_SINK_ENABLED
+#if (defined(SCRIBE_COAP_SINK_ENABLED)) && (!defined(RIOT_VERSION))
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -117,5 +117,5 @@ extern int coap_blockwise_put_bytes_pkt(coap_pkt_t *pdu, coap_block_slicer_t *sl
  */
 extern bool coap_block2_finish(coap_block_slicer_t *slicer);
 
-#endif /* SCRIBE_COAP_SINK_ENABLED */
+#endif /* (defined(SCRIBE_COAP_SINK_ENABLED)) && (!defined(RIOT_VERSION)) */
 #endif /* SCRIBE_COAP_FAKE_NANOCOAP_H */

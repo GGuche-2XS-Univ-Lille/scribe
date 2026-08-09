@@ -1,6 +1,6 @@
 #include "fake_nanocoap.h"
 
-#ifdef SCRIBE_COAP_SINK_ENABLED
+#if (defined(SCRIBE_COAP_SINK_ENABLED)) && (!defined(RIOT_VERSION))
 
 #include <stdio.h>
 #include <inttypes.h>
@@ -81,4 +81,4 @@ bool coap_block2_finish(coap_block_slicer_t *slicer) {
     return true;
 }
 
-#endif /* SCRIBE_COAP_SINK_ENABLED */
+#endif  /* (defined(SCRIBE_COAP_SINK_ENABLED)) && (!defined(RIOT_VERSION)) */
