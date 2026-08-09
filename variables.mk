@@ -1,7 +1,6 @@
 ifeq ($(strip $(VARIABLES_MK)),)
 VARIABLES_MK := VARIABLES_MAKEFILE
 
-
 include $(ROOT)/makefiles/root.mk
 include $(ROOT)/makefiles/help.mk
 include $(ROOT)/makefiles/quiet.mk

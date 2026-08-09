@@ -1,8 +1,4 @@
 ROOT := $(abspath ..)
-include $(ROOT)/makefiles/root.mk
-include $(ROOT)/makefiles/quiet.mk
-include $(ROOT)/makefiles/board.mk
-include $(ROOT)/makefiles/help.mk
 
 include $(ROOT)/variables.mk
 

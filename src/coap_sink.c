@@ -25,7 +25,6 @@ scribe_code_t scribe_coap_sink_prepare_method(scribe_sink_t *this_sink, void *da
     }
 
     this_coap_sink->members.pdu = pdu;
-    this_coap_sink->members.written_bytes_count = 0;
 
     coap_block2_init(pdu, &(this_coap_sink->members.slicer));
 
@@ -45,7 +44,6 @@ scribe_code_t scribe_coap_sink_write_method(scribe_sink_t *this_sink,
         return SCRIBE_CODE_WRITE_FAILURE;
     }
 
-    this_coap_sink->members.written_bytes_count += bytesize;
     return SCRIBE_CODE_OK;
 }
 

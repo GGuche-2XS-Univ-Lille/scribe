@@ -29,11 +29,11 @@ BUILD_PARAMS_TRACKER := $(BUILD_DIR_PATH)/params_tracker
 
 $(BUILD_PARAMS_TRACKER): FORCE | $(BUILD_DIR_PATH)
 	@echo "BOARD=\"$(BOARD)\" DEBUG=\"$(DEBUG)\" \
-               LOG="$(LOG)" LOG_SEVERITY_LEVEL="$(LOG_SEVERITY_LEVEL)" \
+               LOG=\"$(LOG)\" LOG_SEVERITY_LEVEL=\"$(LOG_SEVERITY_LEVEL)\" \
                PREFIX=\"$(PREFIX)\" CC=\"$(CC)\" CFLAGS=\"$(CFLAGS)\"" | \
          cmp -s - $@ || \
          echo "BOARD=\"$(BOARD)\" DEBUG=\"$(DEBUG)\" \
-               LOG="$(LOG)" LOG_SEVERITY_LEVEL="$(LOG_SEVERITY_LEVEL)" \
+               LOG=\"$(LOG)\" LOG_SEVERITY_LEVEL=\"$(LOG_SEVERITY_LEVEL)\" \
                PREFIX=\"$(PREFIX)\" CC=\"$(CC)\" CFLAGS=\"$(CFLAGS)\"" > $@
 
 FORCE:

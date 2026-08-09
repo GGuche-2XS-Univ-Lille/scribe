@@ -33,7 +33,6 @@ SCRIBE_SINK_CLASS_INITIALIZER(prepare_method, write_method, commit_method)
 typedef struct scribe_coap_sink_instance_members_s {
     coap_pkt_t         *pdu;
     coap_block_slicer_t slicer;
-    ssize_t             written_bytes_count;
 } scribe_coap_sink_instance_members_t;
 
 #define SCRIBE_COAP_SINK_INSTANCE_DEFAULT_MEMBERS  NULL
@@ -42,7 +41,6 @@ typedef struct scribe_coap_sink_instance_members_s {
 {                                                              \
     .pdu = pdu_ptr,                                            \
     .slicer = SCRIBE_COAP_SINK_SLICER_DEFAULT_INITIALIZER(),   \
-    .written_bytes_count = 0,                                  \
 }
 
 #define SCRIBE_COAP_SINK_INSTANCE_MEMBERS_DEFAULT_INITIALIZER() \

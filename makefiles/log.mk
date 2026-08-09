@@ -26,15 +26,20 @@ ifdef LOG_DEFAULT_VALUE
 endif
 LOG_DEFAULT_VALUE := $(LOG_DISABLED)
 
-ifndef LOG
-    $LOG := $(LOG_NONE)
-    ifdef DEBUG
+ifeq ($(strip $(DEBUG)),1)
+
+    ifeq ($(strip $(LOG)),)
         LOG := $(LOG_ENABLED)
         ifeq ($(QUIET_CHAR),)
-            $(warning LOG automatically defined due to DEBUG")
+            $(warning LOG automatically defined due to DEBUG)
         endif
-    endif
-endif
+    else # ($(strip $(LOG)),)
+        ifeq ($(strip $(LOG)),$(LOG_DISABLED))
+            $(error LOG (\"$(LOG)\") is disabled and DEBUG is enabled)
+        endif
+    endif # ($(strip $(LOG)),)
+
+endif # ($(strip $(DEBUG)),1)
 
 ifeq ($(strip $(LOG)),)
     override LOG := $(LOG_DEFAULT_VALUE)
@@ -43,13 +48,14 @@ ifeq ($(strip $(LOG)),)
     endif
 endif
 
-ifneq ($(words $(LOG)), 1)
+ifneq ($(words $(LOG)),1)
     $(error LOG variable must contain only one word ! Here LOG="$(LOG)")
 endif
 
 ifeq ($(filter \"$(LOG)\", $(LOG_POSSIBLE_VALUES)),)
     $(error LOG "$(LOG)" is not in supported logs ($(LOG_POSSIBLE_VALUES)))
 endif
+
 
 ifeq ($(QUIET_CHAR),)
     $(info LOG is "$(LOG)")

@@ -20,6 +20,13 @@ static const char *scribe_log_severity_level_labels[SCRIBE_LOG_SEVERITY_LEVELS_C
 #endif
 };
 
+#ifndef NDEBUG
+#   if (SCRIBE_LOG_SEVERITY_LEVEL_DEFAULT != SCRIBE_LOG_SEVERITY_LEVEL_DEBUG) && \
+       (SCRIBE_LOG_SEVERITY_LEVEL_DEFAULT != 7)
+#       error DEBUG is required but SCRIBE_LOG_SEVERITY_LEVEL_DEFAULT is not set to SCRIBE_LOG_SEVERITY_LEVEL_DEBUG nor to 7
+#   endif
+#endif
+
 static scribe_log_severity_level_t scribe_log_severity_level = SCRIBE_LOG_SEVERITY_LEVEL_DEFAULT;
 
 static inline bool scribe_log_check_severity_level(scribe_log_severity_level_t severity_level) {
@@ -63,9 +70,10 @@ void scribe_log(scribe_log_severity_level_t severity_level, const char *format, 
     }
 
     const char *severity_level_label = scribe_log_get_severity_level_label(severity_level);
+    (void)printf("%s", severity_level_label);
+
     va_list ap;
 
-    (void)printf("%s", severity_level_label);
     va_start(ap, format);
     (void)vprintf(format, ap);
     va_end(ap);

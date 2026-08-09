@@ -2,10 +2,12 @@
 
 #include "scribe.h"
 
-// TODO Mutexes ?
+// TODO Mutexes here instead of requiring it from callers ?
 
 static scribe_sink_t **scribe_sinks       = NULL;
 static size_t          scribe_sinks_count = 0;
+
+static size_t          scribe_written_bytes_count = 0;
 
 static inline scribe_code_t scribe_check(void) {
     const scribe_code_t code = ((scribe_sinks == NULL) || (scribe_sinks_count == 0)) ?
@@ -34,8 +36,9 @@ scribe_code_t scribe_initialize(scribe_sink_t **sinks, size_t sinks_count) {
         }
     }
 
-    scribe_sinks = sinks;
-    scribe_sinks_count = sinks_count;
+    scribe_sinks               = sinks;
+    scribe_sinks_count         = sinks_count;
+    scribe_written_bytes_count = 0;
     return SCRIBE_CODE_OK;
 }
 
@@ -50,6 +53,7 @@ scribe_code_t scribe_prepare(void **data) {
             return code;
         }
     }
+    scribe_written_bytes_count = 0;
     return SCRIBE_CODE_OK;
 }
 
@@ -70,10 +74,11 @@ scribe_code_t scribe_write(const void *data, size_t bytesize) {
             return code;
         }
     }
+    scribe_written_bytes_count += bytesize;
     return SCRIBE_CODE_OK;
 }
 
-scribe_code_t scribe_commit(void) {
+scribe_code_t scribe_commit(size_t *written_bytes_count) {
     scribe_code_t code = scribe_check();
     if (code != SCRIBE_CODE_OK) {
         return code;
@@ -84,10 +89,15 @@ scribe_code_t scribe_commit(void) {
             return code;
         }
     }
+    if (written_bytes_count != NULL) {
+        *written_bytes_count = scribe_written_bytes_count;
+    }
+    scribe_written_bytes_count = 0;
     return SCRIBE_CODE_OK;
 }
 
 void scribe_release(void) {
     scribe_sinks       = NULL;
     scribe_sinks_count = 0;
+    scribe_written_bytes_count = 0;
 }
