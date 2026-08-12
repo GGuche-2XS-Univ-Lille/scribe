@@ -64,18 +64,24 @@ const char *scribe_log_get_severity_level_label(scribe_log_severity_level_t seve
     return scribe_log_severity_level_labels[severity_level];
 }
 
-void scribe_log(scribe_log_severity_level_t severity_level, const char *format, ...) {
+void scribe_log(FILE *file, scribe_log_severity_level_t severity_level, const char *format, ...) {
+    assert(file != NULL);
+    assert(file != stdin);
+    if ((file == NULL) || (file == stdin)) {
+        return;
+    }
+
     if (severity_level > scribe_log_severity_level) {
         return;
     }
 
     const char *severity_level_label = scribe_log_get_severity_level_label(severity_level);
-    (void)printf("%s", severity_level_label);
+    (void)fprintf(file, "%s", severity_level_label);
 
     va_list ap;
 
     va_start(ap, format);
-    (void)vprintf(format, ap);
+    (void)vfprintf(file, format, ap);
     va_end(ap);
 }
 

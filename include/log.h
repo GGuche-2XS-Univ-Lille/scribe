@@ -1,6 +1,8 @@
 #ifndef SCRIBE_LOG_H
 #define SCRIBE_LOG_H
 
+#include <stdio.h>
+
 typedef enum scribe_log_severity_level_e {
     SCRIBE_LOG_SEVERITY_LEVEL_EMERGENCY   = 0,
     SCRIBE_LOG_SEVERITY_LEVEL_EMERG       = SCRIBE_LOG_SEVERITY_LEVEL_EMERGENCY,
@@ -57,11 +59,13 @@ typedef enum scribe_log_severity_level_e {
 extern void scribe_log_set_severity_level(scribe_log_severity_level_t severity_level);
 extern scribe_log_severity_level_t scribe_log_get_severity_level(void);
 extern const char *scribe_log_get_severity_level_label(scribe_log_severity_level_t severity_level);
-extern void scribe_log(scribe_log_severity_level_t severity_level, const char *format, ...);
+extern void scribe_log(FILE *file,
+                       scribe_log_severity_level_t severity_level, const char *format, ...);
 
-#define SCRIBE_LOG(severity_level, format, ...)                                                   \
+#define SCRIBE_LOG(file, severity_level, format, ...)                                                   \
 do {                                                                                              \
-    scribe_log(severity_level, ":%s:%s:%d:" format, __FILE__, __func__, __LINE__, ##__VA_ARGS__); \
+    scribe_log(file,                                                                              \
+               severity_level, ":%s:%s:%d:" format, __FILE__, __func__, __LINE__, ##__VA_ARGS__); \
 } while (0)
 
 #else /* SCRIBE_LOG_ENABLED */
@@ -69,43 +73,43 @@ do {                                                                            
 #define scribe_log_set_severity_level(severity_level) do {} while(0)
 #define scribe_log_get_severity_level() (-1)
 #define scribe_log_get_severity_level_label(severity_level) SCRIBE_LOG_SEVERITY_LEVEL_UNKNOWN_LABEL
-#define scribe_log(severity_level, format, ...) do {} while(0)
+#define scribe_log(file, severity_level, format, ...) do {} while(0)
 
-#define SCRIBE_LOG(severity_level, format, ...) do {} while (0)
+#define SCRIBE_LOG(file, severity_level, format, ...) do {} while (0)
 
 #endif /* SCRIBE_LOG_ENABLED */
 
 #define SCRIBE_LOG_EMERGENCY(format, ...) \
-SCRIBE_LOG(SCRIBE_LOG_SEVERITY_LEVEL_EMERGENCY, format, ##__VA_ARGS__)
+SCRIBE_LOG(stderr, SCRIBE_LOG_SEVERITY_LEVEL_EMERGENCY, format, ##__VA_ARGS__)
 #define SCRIBE_LOG_EMERG(format, ...)  SCRIBE_LOG_EMERGENCY(format, ##__VA_ARGS__)
 
 #define SCRIBE_LOG_ALERT(format, ...) \
-SCRIBE_LOG(SCRIBE_LOG_SEVERITY_LEVEL_ALERT, format, ##__VA_ARGS__)
+SCRIBE_LOG(stderr, SCRIBE_LOG_SEVERITY_LEVEL_ALERT, format, ##__VA_ARGS__)
 
 #define SCRIBE_LOG_CRITICAL(format, ...) \
-SCRIBE_LOG(SCRIBE_LOG_SEVERITY_LEVEL_CRITICAL, format, ##__VA_ARGS__)
-#define SCRIBE_LOG_CRIT(format, ...)   SCRIBE_LOG_CRITICAL(format, ##__VA_ARGS__)
+SCRIBE_LOG(stderr, SCRIBE_LOG_SEVERITY_LEVEL_CRITICAL, format, ##__VA_ARGS__)
+#define SCRIBE_LOG_CRIT(stderr, format, ...)   SCRIBE_LOG_CRITICAL(format, ##__VA_ARGS__)
 
 #define SCRIBE_LOG_ERROR(format, ...) \
-SCRIBE_LOG(SCRIBE_LOG_SEVERITY_LEVEL_ERROR, format, ##__VA_ARGS__)
+SCRIBE_LOG(stderr, SCRIBE_LOG_SEVERITY_LEVEL_ERROR, format, ##__VA_ARGS__)
 #define SCRIBE_LOG_ERR(format, ...)    SCRIBE_LOG_ERROR(format, ##__VA_ARGS__)
 
 #define SCRIBE_LOG_WARNING(format, ...) \
-SCRIBE_LOG(SCRIBE_LOG_SEVERITY_LEVEL_WARNING, format, ##__VA_ARGS__)
+SCRIBE_LOG(stderr, SCRIBE_LOG_SEVERITY_LEVEL_WARNING, format, ##__VA_ARGS__)
 #define SCRIBE_LOG_WARN(format, ...)   SCRIBE_LOG_WARNING(format, ##__VA_ARGS__)
 
 #define SCRIBE_LOG_NOTICE(format, ...) \
-SCRIBE_LOG(SCRIBE_LOG_SEVERITY_LEVEL_NOTICE, format, ##__VA_ARGS__)
+SCRIBE_LOG(stdout, SCRIBE_LOG_SEVERITY_LEVEL_NOTICE, format, ##__VA_ARGS__)
 
 #define SCRIBE_LOG_INFORMATION(format, ...) \
-SCRIBE_LOG(SCRIBE_LOG_SEVERITY_LEVEL_INFORMATION, format, ##__VA_ARGS__)
+SCRIBE_LOG(stdout, SCRIBE_LOG_SEVERITY_LEVEL_INFORMATION, format, ##__VA_ARGS__)
 #define SCRIBE_LOG_INFO(format, ...)   SCRIBE_LOG_INFORMATION(format, ##__VA_ARGS__)
 
 #ifdef NDEBUG
 #   define SCRIBE_LOG_DEBUG(format, ...) do {} while(0)
 #else
 #   define SCRIBE_LOG_DEBUG(format, ...) \
-    SCRIBE_LOG(SCRIBE_LOG_SEVERITY_LEVEL_DEBUG, format, ##__VA_ARGS__)
+    SCRIBE_LOG(stdout, SCRIBE_LOG_SEVERITY_LEVEL_DEBUG, format, ##__VA_ARGS__)
 #endif
 
 #endif /* SCRIBE_LOG_H */
