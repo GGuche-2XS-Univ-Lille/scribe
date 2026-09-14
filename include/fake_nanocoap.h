@@ -14,6 +14,7 @@
 
 #define COAP_CODE_CONTENT           ((2 << 5) | 5)   /**< Response Code: 2.05 Content */
 #define COAP_FORMAT_TEXT            (0)
+#define COAP_FORMAT_JSON            (50)
 #define COAP_OPT_FINISH_PAYLOAD     (0x0001)
 
 typedef void coap_pkt_t;

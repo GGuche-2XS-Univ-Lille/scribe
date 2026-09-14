@@ -56,7 +56,7 @@ scribe_code_t scribe_coap_sink_prepare_method(scribe_sink_t *this_sink, void *da
         return SCRIBE_CODE_PREPARATION_FAILURE;
     }
 
-    res = coap_opt_add_format(pdu, COAP_FORMAT_TEXT);
+    res = coap_opt_add_format(pdu, COAP_FORMAT_JSON);
     if (res < 0) {
         printf("failed to add coap format option : %zd\n", res);
         return SCRIBE_CODE_PREPARATION_FAILURE;
