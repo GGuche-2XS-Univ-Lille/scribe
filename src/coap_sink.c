@@ -58,19 +58,19 @@ scribe_code_t scribe_coap_sink_prepare_method(scribe_sink_t *this_sink, void *da
 
     res = coap_opt_add_format(pdu, COAP_FORMAT_JSON);
     if (res < 0) {
-        printf("failed to add coap format option : %zd\n", res);
+        SCRIBE_LOG_ERROR("failed to add coap format option : %zd\n", res);
         return SCRIBE_CODE_PREPARATION_FAILURE;
     }
 
     res = coap_opt_add_block2(pdu, slicer, true);
     if (res < 0) {
-        printf("failed to add block2 option : %zd\n", res);
+        SCRIBE_LOG_ERROR("failed to add block2 option : %zd\n", res);
         return SCRIBE_CODE_PREPARATION_FAILURE;
     }
 
     res = coap_opt_finish(pdu, COAP_OPT_FINISH_PAYLOAD);
     if (res < 0) {
-        printf("failed to finish options : %zd\n", res);
+        SCRIBE_LOG_ERROR("failed to finish options : %zd\n", res);
         return SCRIBE_CODE_PREPARATION_FAILURE;
     }
 
