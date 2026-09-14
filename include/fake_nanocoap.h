@@ -103,8 +103,8 @@ extern ssize_t coap_opt_finish(coap_pkt_t *pkt, uint16_t flags);
  * @retval          -EOVERFLOW      Not enough space in buffer
  * @retval          <0              Other error
  */
-extern int coap_blockwise_put_bytes_pkt(coap_pkt_t *pdu, coap_block_slicer_t *slicer,
-                                        const void *c, size_t len);
+extern int xsxs_coap_blockwise_put_bytes_pkt(coap_pkt_t *pdu, coap_block_slicer_t *slicer,
+                                             const void *c, size_t len);
 
 /**
  * @brief Finish a block2 response

@@ -4,6 +4,7 @@
 
 #ifdef RIOT_VERSION
 #include "net/gcoap.h"
+#include "xsxs_coap.h"
 #endif
 
 #include <assert.h>
@@ -84,9 +85,9 @@ scribe_code_t scribe_coap_sink_write_method(scribe_sink_t *this_sink,
     SCRIBE_LOG_DEBUG("(this=%p, data=%p, bytesize=%zu)\n", this_sink, data, bytesize);
     scribe_coap_sink_t *this_coap_sink = (scribe_coap_sink_t *)this_sink;
 
-    if (coap_blockwise_put_bytes_pkt(this_coap_sink->members.pdu,
-                                     &(this_coap_sink->members.slicer),
-                                     data, bytesize) < 0) {
+    if (xsxs_coap_blockwise_put_bytes_pkt(this_coap_sink->members.pdu,
+                                          &(this_coap_sink->members.slicer),
+                                          data, bytesize) < 0) {
         SCRIBE_LOG_ERROR("Failed to write %zu bytes from %p\n");
         return SCRIBE_CODE_WRITE_FAILURE;
     }
