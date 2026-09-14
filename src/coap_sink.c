@@ -2,6 +2,10 @@
 
 #ifdef SCRIBE_COAP_SINK_ENABLED
 
+#ifdef RIOT_VERSION
+#include "net/gcoap.h"
+#endif
+
 #include <assert.h>
 
 #include "log.h"
