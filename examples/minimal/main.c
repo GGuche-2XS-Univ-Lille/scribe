@@ -104,13 +104,17 @@ int main(int argc, const char *argv[]) {
     }
 
 #ifdef SCRIBE_COAP_SINK_ENABLED
-    coap_pkt_t *pdu = (coap_pkt_t *)0xCAFEBABE;
+    scribe_coap_sink_prepare_data_t coap_sink_prepare_data = {
+        .pdu        = (coap_pkt_t *)0xCAFEBABE,
+        .buffer     = (uint8_t *)0xC0CAC01A,
+        .bytesize   = 42
+    };
 #endif
 
     void *sinks_prepare_data[SINKS_COUNT] = {
         [STDOUT_SINK_INDEX] = NULL,
 #ifdef SCRIBE_COAP_SINK_ENABLED
-        [  COAP_SINK_INDEX] = pdu,
+        [  COAP_SINK_INDEX] = &coap_sink_prepare_data,
 #endif
     };
     code = scribe_prepare(sinks_prepare_data);

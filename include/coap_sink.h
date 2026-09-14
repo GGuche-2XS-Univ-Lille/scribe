@@ -60,6 +60,12 @@ typedef struct scribe_coap_sink_s {
 #define SCRIBE_COAP_SINK_DEFAULT_INITIALIZER() \
 SCRIBE_COAP_SINK_INITIALIZER( SCRIBE_COAP_SINK_INSTANCE_DEFAULT_MEMBERS )
 
+typedef struct scribe_coap_sink_prepare_data_s {
+    coap_pkt_t *pdu;
+    uint8_t    *buffer;
+    size_t      bytesize;
+} scribe_coap_sink_prepare_data_t;
+
 static inline scribe_code_t scribe_coap_sink_prepare(scribe_coap_sink_t *coap_sink,
                                                      void *data) {
     return scribe_sink_prepare((scribe_sink_t *)coap_sink, data);
