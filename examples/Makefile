@@ -14,7 +14,7 @@ build-minimal:
 	$(QUIET_CHAR)$(MAKE) -C minimal bin/minimal QUIET="$(QUIET)" VERBOSE="$(VERBOSE)" \
                                                     BOARD="$(BOARD)" \
                                                     PREFIX="$(PREFIX)" CC="$(CC)" \
-                                                    DEBUG="$(DEBUG)" COAP="$(COAP)" \
+                                                    DEBUG="$(DEBUG)" \
                                                     LOG="$(LOG)" \
                                                     LOG_SEVERITY_LEVEL="$(LOG_SEVERITY_LEVEL)" \
                                                     CFLAGS="$(CFLAGS)"
@@ -30,7 +30,7 @@ run-minimal:
 	$(QUIET_CHAR)$(MAKE) -C minimal run QUIET="$(QUIET)" VERBOSE="$(VERBOSE)" \
                                             BOARD="$(BOARD)" \
                                             PREFIX="$(PREFIX)" CC="$(CC)" \
-                                            DEBUG="$(DEBUG)" COAP="$(COAP)" \
+                                            DEBUG="$(DEBUG)" \
                                             LOG="$(LOG)" \
                                             LOG_SEVERITY_LEVEL="$(LOG_SEVERITY_LEVEL)" \
                                             CFLAGS="$(CFLAGS)"

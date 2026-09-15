@@ -67,16 +67,14 @@ build-examples: $(BOARD)/$(TARGET).a
                                                BOARD="$(BOARD)" DEBUG="$(DEBUG)" \
                                                PREFIX="$(PREFIX)" CC="$(CC)" CFLAGS="$(CFLAGS)" \
                                                LOG="$(LOG)" \
-                                               LOG_SEVERITY_LEVEL="$(LOG_SEVERITY_LEVEL)" \
-                                               COAP="$(COAP)"
+                                               LOG_SEVERITY_LEVEL="$(LOG_SEVERITY_LEVEL)"
 ifeq ($(strip $(BOARD)), workstation)
 run-examples: build-examples
 	$(QUIET_CHAR)$(MAKE) -C examples run QUIET="$(QUIET)" VERBOSE="$(VERBOSE)" \
                                              BOARD="$(BOARD)" DEBUG="$(DEBUG)" \
                                              PREFIX="$(PREFIX)" CC="$(CC)" CFLAGS="$(CFLAGS)" \
                                              LOG="$(LOG)" \
-                                             LOG_SEVERITY_LEVEL="$(LOG_SEVERITY_LEVEL)" \
-                                             COAP="$(COAP)"
+                                             LOG_SEVERITY_LEVEL="$(LOG_SEVERITY_LEVEL)"
 endif # ($(strip $(BOARD)), workstation)
 
 clean-examples:

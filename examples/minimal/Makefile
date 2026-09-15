@@ -59,13 +59,12 @@ ifdef VERBOSE
 	$(info - LOG_SEVERITY_LEVEL is '$(LOG_SEVERITY_LEVEL)')
 	$(info - BOARD is '$(BOARD)')
 	$(info - CFLAGS is '$(CFLAGS)')
-	$(info - COAP is '$(COAP)')
 endif
 	$(QUIET_CHAR)$(MAKE) -C $(ROOT) \
                              $(SCRIBE_LIB_SHORT) \
                              QUIET="$(QUIET)" BOARD="$(BOARD)" \
                              PREFIX="$(PREFIX)" CC="$(CC)" \
-                             DEBUG="$(DEBUG)" COAP="$(COAP)" \
+                             DEBUG="$(DEBUG)" \
                              LOG="$(LOG)" LOG_SEVERITY_LEVEL="$(LOG_SEVERITY_LEVEL)" \
                              CFLAGS="$(CFLAGS)"
 

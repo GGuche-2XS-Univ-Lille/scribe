@@ -4,10 +4,10 @@
  * This layer has been implemented for development and demonstrations purposes
  */
 
-#ifndef SCRIBE_COAP_FAKE_NANOCOAP_H
-#define SCRIBE_COAP_FAKE_NANOCOAP_H
+#ifndef SCRIBE_FAKE_NANOCOAP_H
+#define SCRIBE_FAKE_NANOCOAP_H
 
-#if (defined(SCRIBE_COAP_SINK_ENABLED)) && (!defined(RIOT_VERSION))
+#if (!defined(RIOT_VERSION))
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -17,10 +17,46 @@
 #define COAP_FORMAT_JSON            (50)
 #define COAP_OPT_FINISH_PAYLOAD     (0x0001)
 
+#define COAP_OPT_Q_BLOCK1       (19)
+#define COAP_OPT_BLOCK2         (23)
+#define COAP_OPT_BLOCK1         (27)
+#define COAP_OPT_Q_BLOCK2       (31)
+
 typedef void coap_pkt_t;
-typedef uint32_t coap_block_slicer_t;
+typedef struct coap_block_slicer_s {
+    size_t start;                   /**< Start offset of the current block  */
+    size_t end;                     /**< End offset of the current block    */
+    size_t cur;                     /**< Offset of the generated content    */
+    uint8_t *opt_value;             /**< Pointer to the value of the placed option */
+} coap_block_slicer_t;
 
 extern void coap_block2_init(coap_pkt_t *pkt, coap_block_slicer_t *slicer);
+
+/**
+ * @brief coap_get_blockopt mock return value setter.
+ *
+ * @param[in] value value to set among {-1, 0, 1}
+ * @returns     <0 on error
+ * @returns     0 on success
+ */
+extern int mock_coap_get_blockopt_set_return_value(int value);
+
+/**
+ * @brief    Generic block option getter
+ *
+ * @param[in]   pkt     pkt to work on
+ * @param[in]   option  actual block option number to get
+ * @param[out]  blknum  block number
+ * @param[out]  szx     SZX value
+ *
+ * @returns     <0 on errors
+ * @returns     -1 if option not found
+ * @returns     <-1 on other errors
+ * @returns     >=0 on successes
+ * @returns     0 if more flag is not set
+ * @returns     1 if more flag is set
+ */
+extern int coap_get_blockopt(coap_pkt_t *pkt, uint16_t option, uint32_t *blknum, uint8_t *szx);
 
 /**
  * @brief   Initializes a CoAP response packet on a buffer
@@ -103,8 +139,8 @@ extern ssize_t coap_opt_finish(coap_pkt_t *pkt, uint16_t flags);
  * @retval          -EOVERFLOW      Not enough space in buffer
  * @retval          <0              Other error
  */
-extern int xsxs_coap_blockwise_put_bytes_pkt(coap_pkt_t *pdu, coap_block_slicer_t *slicer,
-                                             const void *c, size_t len);
+extern int coap_blockwise_put_bytes_pkt(coap_pkt_t *pdu, coap_block_slicer_t *slicer,
+                                        const void *c, size_t len);
 
 /**
  * @brief Finish a block2 response
@@ -122,5 +158,5 @@ extern int xsxs_coap_blockwise_put_bytes_pkt(coap_pkt_t *pdu, coap_block_slicer_
  */
 extern bool coap_block2_finish(coap_block_slicer_t *slicer);
 
-#endif /* (defined(SCRIBE_COAP_SINK_ENABLED)) && (!defined(RIOT_VERSION)) */
-#endif /* SCRIBE_COAP_FAKE_NANOCOAP_H */
+#endif /* (!defined(RIOT_VERSION)) */
+#endif /* SCRIBE_FAKE_NANOCOAP_H */

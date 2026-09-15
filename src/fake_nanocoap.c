@@ -1,6 +1,6 @@
 #include "fake_nanocoap.h"
 
-#if (defined(SCRIBE_COAP_SINK_ENABLED)) && (!defined(RIOT_VERSION))
+#if (!defined(RIOT_VERSION))
 
 #include <stdio.h>
 #include <inttypes.h>
@@ -16,6 +16,41 @@ void coap_block2_init(coap_pkt_t *pkt, coap_block_slicer_t *slicer) {
 #endif
 
     SCRIBE_LOG_DEBUG("(pkt=%p, slicer=%p\n", pkt, slicer);
+}
+
+static int mock_coap_get_blockopt_return_value = 0;
+int mock_coap_get_blockopt_set_return_value(int value) {
+    switch(value) {
+        case -1:
+            /* FALLTHROUGH */
+        case 0:
+            /* FALLTHROUGH */
+        case 1:
+            mock_coap_get_blockopt_return_value = value;
+            return 0;
+        default:
+            return -1;
+    }
+}
+
+int coap_get_blockopt(coap_pkt_t *pkt, uint16_t option, uint32_t *blknum, uint8_t *szx) {
+    if (pkt == NULL)    return -2;
+    if (blknum == NULL) return -3;
+    if (szx == NULL)    return -4;
+    switch(option) {
+        case COAP_OPT_Q_BLOCK1:
+            /* FALLTHROUGH */
+        case COAP_OPT_BLOCK2:
+            /* FALLTHROUGH */
+        case COAP_OPT_BLOCK1:
+            /* FALLTHROUGH */
+        case COAP_OPT_Q_BLOCK2:
+            break;
+        default:
+            return -5;
+    }
+    SCRIBE_LOG_DEBUG("(pkt=%p, option=%" PRIu16 ", blknum=%p, szx=%p)");
+    return mock_coap_get_blockopt_return_value;
 }
 
 int gcoap_resp_init(coap_pkt_t *pdu, uint8_t *buf, size_t len, unsigned code) {
@@ -58,8 +93,8 @@ ssize_t coap_opt_finish(coap_pkt_t *pkt, uint16_t flags) {
     return 0;
 }
 
-int xsxs_coap_blockwise_put_bytes_pkt(coap_pkt_t *pdu, coap_block_slicer_t *slicer,
-                                      const void *c, size_t len) {
+int coap_blockwise_put_bytes_pkt(coap_pkt_t *pdu, coap_block_slicer_t *slicer,
+                                 const void *c, size_t len) {
 #ifdef NDEBUG
     (void)pdu;
     (void)slicer;
@@ -81,4 +116,4 @@ bool coap_block2_finish(coap_block_slicer_t *slicer) {
     return true;
 }
 
-#endif  /* (defined(SCRIBE_COAP_SINK_ENABLED)) && (!defined(RIOT_VERSION)) */
+#endif  /* (!defined(RIOT_VERSION)) */

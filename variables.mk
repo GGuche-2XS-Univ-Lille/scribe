@@ -9,7 +9,6 @@ include $(ROOT)/makefiles/debug.mk
 include $(ROOT)/makefiles/compiler.mk
 include $(ROOT)/makefiles/log.mk
 include $(ROOT)/makefiles/log_severity_level.mk
-include $(ROOT)/makefiles/coap.mk
 
 define help_variables
 $(call help_start_variables_lines)
@@ -28,7 +27,6 @@ $(call help_variable_line,LOG,"Controls logging support","$(LOG_POSSIBLE_VALUES)
 
 $(call help_variable_line,LOG_SEVERITY_LEVEL,"Controls the DEFAULT logging severity level","$(LOG_SEVERITY_LEVELS_POSSIBLE_VALUES)","$(LOG_SEVERITY_LEVEL_DEFAULT_VALUE)")
 
-$(call help_variable_line,COAP,"Controls COAP support","$(COAP_POSSIBLE_VALUES)","$(COAP_DEFAULT_VALUE)")
 endef
 
 endif # ($(strip $(VARIABLES_MK),)
