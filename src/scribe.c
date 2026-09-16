@@ -45,7 +45,7 @@ static inline scribe_code_t write_bytes(const uint8_t *bytes, size_t bytesize) {
         }
 #ifdef RIOT_VERSION
         fprintf(stdout, "%.*s", (int)bytesize, (const char *)bytes);
-#   ifndef NDEBUG
+#   if ((defined(SCRIBE_LOG_ENABLED)) && (!defined(NDEBUG))
         fprintf(stdout, "\n");
 #   endif
 #endif
@@ -77,7 +77,7 @@ static inline scribe_code_t write_bytes(const uint8_t *bytes, size_t bytesize) {
 
 #ifdef RIOT_VERSION
     fprintf(stdout, "%.*s", (int)bytesize, (const char *)bytes);
-#   ifndef NDEBUG
+#   if ((defined(SCRIBE_LOG_ENABLED)) && (!defined(NDEBUG))
     fprintf(stdout, "\n");
 #   endif
 #endif
